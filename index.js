@@ -12,7 +12,7 @@ const RETRIEVE_CATEGORIES = '/api_category.php';
 // **********************************************************
 
 // In-memory database of categories, fetched from API
-const CATEGORIES = [];
+let CATEGORIES = [];
 
 // In-memory database of questions, answers, and correct answer
 
@@ -61,6 +61,7 @@ const getInitialStore = function() {
     userAnswer: '',
     // Current view
     // Score? Anything else?
+    questionNumber: 0,
     score: 0
   };
 };
@@ -85,9 +86,10 @@ function fetchQuestions() {}
 function fetchCategories() {
   let categoryFetchURL = BASE_URL + RETRIEVE_CATEGORIES;
   $.getJSON(categoryFetchURL, function (data) {
-    CATEGORIES.push(data.trivia_categories);
+    CATEGORIES = data.trivia_categories;
     // let fetchedCategories = fetchCategories().trivia_categories;
     // CATEGORIES.push(fetchedCategories);
+    console.log(CATEGORIES);
   });
 }
 
@@ -106,6 +108,32 @@ function addQuestion() {}
 // *******************
 // Template generators
 // *******************
+
+function generateQuizOptionsView() {
+  return `
+    <div>
+      <h1>Select your Trivia Quiz options!</h1>
+      <form>
+        <h3>Choose quiz category</h3>
+        <select name="categories" class= "quiz-category-options">
+        </select>
+        <h3>Choose number of questions</h3>
+        <div class="quiz-length">
+          <input id="quiz-length-inpu"t type"=number">
+        </div>
+        <div class="user-input">
+          <button name= "submit-button" id= "quiz-begin-button" class= "input-button" type= "submit" >Begin quiz!</button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function generateQuizCategoryOptions(category) {
+  return `
+  <option value="${category.name}">${category.name}</option>
+  `;
+}
 
 function generateAnswerView() {
   let questionIndex = STORE.currentQuestion;  //********** change all keys to camelCasing (no spaces) */
@@ -304,8 +332,13 @@ function generateResultsView() {
 // *******************
 
 function renderQuizOptions() {
-  fetchCategories();
-  console.log('categories', CATEGORIES);
+  let quizOptionsView = generateQuizOptionsView();
+  let quizCategoryOptions = CATEGORIES.map(function(category) {
+    return generateQuizCategoryOptions(category);
+  }).join('');
+  // $('.container').html(quizOptionsView);
+  $('.container').html(quizOptionsView);
+  $('.quiz-category-options').html(quizCategoryOptions);
 }
 
 function renderQuestionView() {
@@ -337,12 +370,17 @@ function renderResultsView() {
 // **************
 
 function handleUserInputs() {
-  // listener for begin button to trigger rendering of first question
-  $('#quiz-start-button').on('click', event => {
+  // listener for start page button to trigger rendering of question options view
+  $('#good-luck-button').on('click', event => {
+    event.preventDefault();
     STORE = getInitialStore();
     renderQuizOptions();
-    // renderQuestionView();
   });
+
+  // listener for quiz begin button
+  $('.container').on('click', '#quiz-begin-button', event => {
+  });
+
   // listener for answer submit button
   $('.container').on('click', '#answer-submit-button', event => {
     event.preventDefault();
@@ -385,5 +423,6 @@ function handleUserInputs() {
 // ******************
 
 $(function main() {
+  fetchCategories();
   handleUserInputs();
 });
