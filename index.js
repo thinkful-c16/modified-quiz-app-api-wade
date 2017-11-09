@@ -11,7 +11,8 @@ const RETRIEVE_CATEGORIES = '/api_category.php';
 
 // **********************************************************
 
-
+// In-memory database of categories, fetched from API
+const CATEGORIES = [];
 
 // In-memory database of questions, answers, and correct answer
 
@@ -294,7 +295,8 @@ function generateResultsView() {
 // *******************
 
 function renderQuizOptions() {
-
+  CATEGORIES.push(fetchCategories().trivia_categories);
+  console.log(CATEGORIES);
 }
 
 function renderQuestionView() {
@@ -328,8 +330,9 @@ function renderResultsView() {
 function handleUserInputs() {
   // listener for begin button to trigger rendering of first question
   $('#quiz-start-button').on('click', event => {
-    let STORE = getInitialStore();
-    renderQuestionView();
+    STORE = getInitialStore();
+    renderQuizOptions();
+    // renderQuestionView();
   });
   // listener for answer submit button
   $('.container').on('click', '#answer-submit-button', event => {
