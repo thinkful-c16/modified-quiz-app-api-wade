@@ -7,8 +7,10 @@
 const BASE_URL = 'https://opentdb.com';
 const MAIN_PATH_SEARCH = '/api.php?';
 const RETRIEVE_TOKEN_PATH = '/api_token.php?command=request';
+const RETRIEVE_CATEGORIES = '/api_category.php';
 
 // **********************************************************
+
 
 
 // In-memory database of questions, answers, and correct answer
@@ -51,7 +53,7 @@ const QUESTIONS = [
 const getInitialStore = function() {
   return {
     // Current Question Index
-    currentQuestion: null,
+    currentQuestion: 0,
     // Current Question counter
     currentCounter: 1,
     // User's answer choice(s)
@@ -64,6 +66,32 @@ const getInitialStore = function() {
 
 let STORE = getInitialStore();
 
+// ************************
+// Build URL functions
+// ************************
+
+function buildBaseUrl() {}
+function buildTokenUrl() {}
+
+// ************************
+// API Data Fetch Functions
+// ************************
+
+function fetchToken() {}
+function fetchQuestions() {}
+function fetchCategories() {}
+
+// ***************************
+// Decorate Response Functions
+// ***************************
+
+function decorateQuestion() {}
+
+// **************************
+// Add questions to QUESTIONS
+// **************************
+
+function addQuestion() {}
 
 // *******************
 // Template generators
@@ -93,6 +121,14 @@ function generateAnswerView() {
               <input type="radio" id="${answers[2]}"
               name="answer" value="${answers[2]}">
               <label for="${answers[2]}">${answers[2]}</label>
+              <br>
+              <input type="radio" id="${answers[3]}"
+              name="answer" value="${answers[3]}">
+              <label for="${answers[3]}">${answers[3]}</label>
+              <br>
+              <input type="radio" id="${answers[4]}"
+              name="answer" value="${answers[4]}">
+              <label for="${answers[4]}">${answers[4]}</label>
           </div>
           <div class="user-input">
               <button name= "submit-button" id= "answer-submit-button" class= "input-button" type= "submit" >Submit Answer</button>
@@ -257,6 +293,10 @@ function generateResultsView() {
 // Rendering functions
 // *******************
 
+function renderQuizOptions() {
+
+}
+
 function renderQuestionView() {
   // declaration of variable for answer view generation
   let questionAnswers = generateAnswerView();
@@ -288,6 +328,7 @@ function renderResultsView() {
 function handleUserInputs() {
   // listener for begin button to trigger rendering of first question
   $('#quiz-start-button').on('click', event => {
+    let STORE = getInitialStore();
     renderQuestionView();
   });
   // listener for answer submit button
