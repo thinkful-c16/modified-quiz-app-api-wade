@@ -79,8 +79,17 @@ function buildTokenUrl() {}
 // ************************
 
 function fetchToken() {}
+
 function fetchQuestions() {}
-function fetchCategories() {}
+
+function fetchCategories() {
+  let categoryFetchURL = BASE_URL + RETRIEVE_CATEGORIES;
+  $.getJSON(categoryFetchURL, function (data) {
+    CATEGORIES.push(data.trivia_categories);
+    // let fetchedCategories = fetchCategories().trivia_categories;
+    // CATEGORIES.push(fetchedCategories);
+  });
+}
 
 // ***************************
 // Decorate Response Functions
@@ -295,8 +304,8 @@ function generateResultsView() {
 // *******************
 
 function renderQuizOptions() {
-  CATEGORIES.push(fetchCategories().trivia_categories);
-  console.log(CATEGORIES);
+  fetchCategories();
+  console.log('categories', CATEGORIES);
 }
 
 function renderQuestionView() {
