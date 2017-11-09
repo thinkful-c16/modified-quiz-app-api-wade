@@ -12,41 +12,14 @@ const RETRIEVE_CATEGORIES = '/api_category.php';
 // **********************************************************
 
 // Data store of token
-let TOKEN = '';
+let TOKEN = {};
 
 // In-memory database of categories, fetched from API
 let CATEGORIES = [];
 
 // In-memory database of questions, answers, and correct answer
-
-const QUESTIONS = [
-  {
-    question: 'Who is the supreme lord and most powerful archdevil of the Nine Hells?',
-    answers: ['Asmodeus', 'Richard Greenhill', 'Mephistopheles'],
-    correctAnswer: 'Asmodeus'
-  },
-  {
-    question: 'How many layers are there in the Nine Hells?',
-    answers: ['Several thousand', 'Only one', 'Nine'],
-    correctAnswer: 'Nine'
-  },
-  {
-    question: 'What is the arrival point for any visitors to the Nine Hells?',
-    answers: ['the stench-ridden bog of Minauros', 'the rocky wastes of Avernus', 'the dark pits of Nessus'],
-    correctAnswer: 'the rocky wastes of Avernus'
-  },
-  {
-    question: 'What is the largest metropolis in the Nine Hells?',
-    answers: ['the Iron City of Dis', 'the Clockwork Nirvana of Mechanus', 'Abriymoch, the Obsidian Fortress'],
-    correctAnswer: 'the Iron City of Dis'
-  },
-  {
-    question: 'Where does the infernal court of Asmodeus reside?',
-    answers: ['the River Styx', 'the citadel-spire of Malsheem', 'the City of Brass'],
-    correctAnswer: 'the citadel-spire of Malsheem'
-  }
-];
-
+let QUESTIONS2 = [];
+let QUESTIONS = [];
 // *************************
 // Create your initial store
 // *************************
@@ -57,7 +30,8 @@ const QUESTIONS = [
 const getInitialStore = function() {
   return {
     categorySelection: '',
-    quizLengthSelection: 0,
+    categorySelectionId: null,
+    quizLengthSelection: null,
     // Current Question Index
     currentQuestion: 0,
     // Current Question counter
@@ -77,8 +51,11 @@ let STORE = getInitialStore();
 // Build URL functions
 // ************************
 
-function buildBaseUrl() {}
-function buildTokenUrl() {}
+function buildQueryUrl() {
+  let query = BASE_URL + MAIN_PATH_SEARCH + 'amount=' + STORE.quizLengthSelection + '&category=' + STORE.categorySelectionId + '&type=multiple&token=' + TOKEN.token;
+  console.log(query);
+  fetchQuestions(query);
+}
 
 // ************************
 // API Data Fetch Functions
@@ -89,11 +66,18 @@ function fetchToken() {
   $.getJSON(tokenFetchURL, function (token) {
     TOKEN = token;
     console.log(TOKEN);
-    
+    buildQueryUrl();
   });
 }
 
-function fetchQuestions() {}
+function fetchQuestions(query) {
+  $.getJSON(query, function (questions) {
+    console.log('questions.results', questions.results);
+    QUESTIONS = questions.results;
+    return decorateQuestion(QUESTIONS);
+  });
+  // decorateQuestion();
+}
 
 function fetchCategories() {
   let categoryFetchURL = BASE_URL + RETRIEVE_CATEGORIES;
@@ -110,7 +94,17 @@ function fetchCategories() {
 // Decorate Response Functions
 // ***************************
 
-function decorateQuestion() {}
+function decorateQuestion(QUESTIONS) {
+  console.log('here', QUESTIONS);
+  QUESTIONS2 = QUESTIONS.map(function(questionObject) {
+    return {
+      question: questionObject.question,
+      answers: [(questionObject.correct_answer + ',' + questionObject.incorrect_answers).split(',')],
+      correctAnswer: questionObject.correct_answer
+    };
+  });
+  console.log(QUESTIONS2);
+}
 
 // **************************
 // Add questions to QUESTIONS
@@ -396,7 +390,11 @@ function handleUserInputs() {
   $('.container').on('click', '#quiz-begin-button', event => {
     event.preventDefault();
     STORE.categorySelection = $(event.currentTarget).closest('form').find('.quiz-category-options').val();
-    console.log(STORE.categorySelection);
+    for (let i = 0; i < CATEGORIES.length; i++) {
+      if (CATEGORIES[i].name === STORE.categorySelection) {
+        STORE.categorySelectionId = CATEGORIES[i].id;
+      }
+    }
     STORE.quizLengthSelection = $(event.currentTarget).closest('form').find('#quiz-length-input').val();
     console.log(STORE.quizLengthSelection);
     if (STORE.quizLengthSelection > 0 && STORE.quizLengthSelection <= 50) {
