@@ -1,5 +1,16 @@
 'use strict';
 
+// *********************************************************
+// constants for path
+// variables to hold pieces of overall query string
+
+const BASE_URL = 'https://opentdb.com';
+const MAIN_PATH_SEARCH = '/api.php?';
+const RETRIEVE_TOKEN_PATH = '/api_token.php?command=request';
+
+// **********************************************************
+
+
 // In-memory database of questions, answers, and correct answer
 
 const QUESTIONS = [
