@@ -11,6 +11,9 @@ const RETRIEVE_CATEGORIES = '/api_category.php';
 
 // **********************************************************
 
+// Data store of token
+let TOKEN = '';
+
 // In-memory database of categories, fetched from API
 let CATEGORIES = [];
 
@@ -53,6 +56,8 @@ const QUESTIONS = [
 
 const getInitialStore = function() {
   return {
+    categorySelection: '',
+    quizLengthSelection: 0,
     // Current Question Index
     currentQuestion: 0,
     // Current Question counter
@@ -79,7 +84,14 @@ function buildTokenUrl() {}
 // API Data Fetch Functions
 // ************************
 
-function fetchToken() {}
+function fetchToken() {
+  let tokenFetchURL = BASE_URL + RETRIEVE_TOKEN_PATH;
+  $.getJSON(tokenFetchURL, function (token) {
+    TOKEN = token;
+    console.log(TOKEN);
+    
+  });
+}
 
 function fetchQuestions() {}
 
@@ -89,6 +101,7 @@ function fetchCategories() {
     CATEGORIES = data.trivia_categories;
     // let fetchedCategories = fetchCategories().trivia_categories;
     // CATEGORIES.push(fetchedCategories);
+    renderQuizOptions();
     console.log(CATEGORIES);
   });
 }
@@ -115,12 +128,13 @@ function generateQuizOptionsView() {
       <h1>Select your Trivia Quiz options!</h1>
       <form>
         <h3>Choose quiz category</h3>
-        <select name="categories" class= "quiz-category-options">
+        <select name="categories" id= "quiz-category-options" class= "quiz-category-options">
         </select>
         <h3>Choose number of questions</h3>
         <div class="quiz-length">
-          <input id="quiz-length-inpu"t type"=number">
+          <input id="quiz-length-input" type"=number">
         </div>
+        <p>please select a number between 1 - 50</p>
         <div class="user-input">
           <button name= "submit-button" id= "quiz-begin-button" class= "input-button" type= "submit" >Begin quiz!</button>
         </div>
@@ -374,11 +388,23 @@ function handleUserInputs() {
   $('#good-luck-button').on('click', event => {
     event.preventDefault();
     STORE = getInitialStore();
-    renderQuizOptions();
+    fetchCategories();
+    // renderQuizOptions();
   });
 
   // listener for quiz begin button
   $('.container').on('click', '#quiz-begin-button', event => {
+    event.preventDefault();
+    STORE.categorySelection = $(event.currentTarget).closest('form').find('.quiz-category-options').val();
+    console.log(STORE.categorySelection);
+    STORE.quizLengthSelection = $(event.currentTarget).closest('form').find('#quiz-length-input').val();
+    console.log(STORE.quizLengthSelection);
+    if (STORE.quizLengthSelection > 0 && STORE.quizLengthSelection <= 50) {
+      fetchToken();
+    }
+    else {
+      throw new RangeError('Quiz length must be between 0 and 50');
+    }
   });
 
   // listener for answer submit button
@@ -423,6 +449,5 @@ function handleUserInputs() {
 // ******************
 
 $(function main() {
-  fetchCategories();
   handleUserInputs();
 });
