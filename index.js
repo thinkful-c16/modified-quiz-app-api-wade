@@ -18,7 +18,7 @@ let TOKEN = {};
 let CATEGORIES = [];
 
 // In-memory database of questions, answers, and correct answer
-let QUESTIONS2 = [];
+let DECORATEDQUESTIONS = [];
 let QUESTIONS = [];
 // *************************
 // Create your initial store
@@ -76,7 +76,6 @@ function fetchQuestions(query) {
     QUESTIONS = questions.results;
     return decorateQuestion(QUESTIONS);
   });
-  // decorateQuestion();
 }
 
 function fetchCategories() {
@@ -95,22 +94,15 @@ function fetchCategories() {
 // ***************************
 
 function decorateQuestion(QUESTIONS) {
-  console.log('here', QUESTIONS);
-  QUESTIONS2 = QUESTIONS.map(function(questionObject) {
+  DECORATEDQUESTIONS = QUESTIONS.map(function(questionObject) {
     return {
       question: questionObject.question,
       answers: [(questionObject.correct_answer + ',' + questionObject.incorrect_answers).split(',')],
       correctAnswer: questionObject.correct_answer
     };
   });
-  console.log(QUESTIONS2);
+  renderQuestionView();
 }
-
-// **************************
-// Add questions to QUESTIONS
-// **************************
-
-function addQuestion() {}
 
 // *******************
 // Template generators
@@ -144,17 +136,17 @@ function generateQuizCategoryOptions(category) {
 }
 
 function generateAnswerView() {
-  let questionIndex = STORE.currentQuestion;  //********** change all keys to camelCasing (no spaces) */
-  let answers = QUESTIONS[questionIndex].answers;
+  let questionIndex = STORE.currentQuestion;
+  let answers = DECORATEDQUESTIONS[questionIndex].answers[0];
 
   
   return `<div>
-      <h1>Infernal Plane Quiz</h1>
+      <h1>Trivia Quiz</h1>
       <div class= 'questions-answered'>
-          <p>Question ${STORE.currentCounter}/5</p>
+          <p>Question ${STORE.currentCounter}/${STORE.quizLengthSelection}</p>
       </div>
       <form>
-          <h3>${QUESTIONS[STORE.currentQuestion].question}</h3>
+          <h3>${DECORATEDQUESTIONS[STORE.currentQuestion].question}</h3>
           <div>
               <input type="radio" id="${answers[0]}"
               name="answer" value="${answers[0]}">
@@ -171,16 +163,12 @@ function generateAnswerView() {
               <input type="radio" id="${answers[3]}"
               name="answer" value="${answers[3]}">
               <label for="${answers[3]}">${answers[3]}</label>
-              <br>
-              <input type="radio" id="${answers[4]}"
-              name="answer" value="${answers[4]}">
-              <label for="${answers[4]}">${answers[4]}</label>
           </div>
           <div class="user-input">
               <button name= "submit-button" id= "answer-submit-button" class= "input-button" type= "submit" >Submit Answer</button>
           </div>
           <div class= "current-score">
-              <p>Current score: ${STORE.score}/5</p>
+              <p>Current score: ${STORE.score}/${STORE.quizLengthSelection}</p>
           </div>
       </form>
     </div>`
@@ -189,150 +177,157 @@ function generateAnswerView() {
 
 function generateAnswerFeedback() {
   // conditionals for feedback specific to whether user answer is correct
-  if (STORE.userAnswer === QUESTIONS[STORE.currentQuestion].correctAnswer) {
+  if (STORE.userAnswer === DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer) {
     return `<div>
-    <h1>Infernal Plane Quiz</h1>
+    <h1>Trivia Quiz</h1>
     <div class= 'questions-answered'>
-      <p>Question ${STORE.currentCounter}/5</p>
+      <p>Question ${STORE.currentCounter}/${STORE.quizLengthSelection}</p>
     </div>
     <h3>Your answer is correct!</h3>
     <div class= 'user-answer'>Your answer: ${STORE.userAnswer}
     </div>
-    <div class= 'correct-answer'>Correct answer: ${QUESTIONS[STORE.currentQuestion].correctAnswer}
+    <div class= 'correct-answer'>Correct answer: ${DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer}
     </div>
     <div class="user-input">
     <button name= "submit-button" id= "next-question-button" class= "input-button" type= "submit" >Next question</button>
     </div>
     <div class= "current-score">
-      <p>Current score: ${STORE.score}/5</p>
+      <p>Current score: ${STORE.score}/${STORE.quizLengthSelection}</p>
     </div>
     </div>`;
   }
 
   else {
     return `<div>
-    <h1>Infernal Plane Quiz</h1>
+    <h1>Trivia Quiz</h1>
     <div class= 'questions-answered'>
-      <p>Question ${STORE.currentCounter}/5</p>
+      <p>Question ${STORE.currentCounter}/${STORE.quizLengthSelection}</p>
     </div>
     <h3>Your answer is incorrect!</h3>
     <div class= 'user-answer'>Your answer: ${STORE.userAnswer}
     </div>
-    <div class= 'correct-answer'>Correct answer: ${QUESTIONS[STORE.currentQuestion].correctAnswer}
+    <div class= 'correct-answer'>Correct answer: ${DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer}
     </div>
     <div class="user-input">
     <button name= "submit-button" id= "next-question-button" class= "input-button" type= "submit" >Next question</button>
     </div>
     <div class= "current-score">
-      <p>Current score: ${STORE.score}/5</p>
+      <p>Current score: ${STORE.score}/${STORE.quizLengthSelection}</p>
     </div>
     </div>`;
   }
 }
 
 function generateFinalFeedback() {
-  if (STORE.userAnswer === QUESTIONS[STORE.currentQuestion].correctAnswer) {
+  if (STORE.userAnswer === DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer) {
     return `<div>
-    <h1>Infernal Plane Quiz</h1>
+    <h1>Trivia Quiz</h1>
     <div class= 'questions-answered'>
-      <p>Question ${STORE.currentCounter}/5</p>
+      <p>Question ${STORE.currentCounter}/${STORE.quizLengthSelection}</p>
     </div>
     <h3>Your answer is correct!</h3>
     <div class= 'user-answer'>Your answer: ${STORE.userAnswer}
     </div>
-    <div class= 'correct-answer'>Correct answer: ${QUESTIONS[STORE.currentQuestion].correctAnswer}
+    <div class= 'correct-answer'>Correct answer: ${DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer}
     </div>
     <div class="user-input">
     <button name= "submit-button" id= "final-question-button" class= "input-button" type= "submit" >See your results!</button>
     </div>
     <div class= "current-score">
-      <p>Current score: ${STORE.score}/5</p>
+      <p>Current score: ${STORE.score}/${STORE.quizLengthSelection}</p>
     </div>
     </div>`;
   }
 
   else {
     return `<div>
-    <h1>Infernal Plane Quiz</h1>
+    <h1>Trivia Quiz</h1>
     <div class= 'questions-answered'>
-      <p>Question ${STORE.currentCounter}/5</p>
+      <p>Question ${STORE.currentCounter}/${STORE.quizLengthSelection}</p>
     </div>
     <h3>Your answer is incorrect!</h3>
     <div class= 'user-answer'>Your answer: ${STORE.userAnswer}
     </div>
-    <div class= 'correct-answer'>Correct answer: ${QUESTIONS[STORE.currentQuestion].correctAnswer}
+    <div class= 'correct-answer'>Correct answer: ${DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer}
     </div>
     <div class="user-input">
     <button name= "submit-button" id= "final-question-button" class= "input-button" type= "submit" >See your results!</button>
     </div>
     <div class= "current-score">
-      <p>Current score: ${STORE.score}/5</p>
+      <p>Current score: ${STORE.score}/${STORE.quizLengthSelection}</p>
     </div>
     </div>`;
   }
 }
 
 function generateResultsView() {
-  if (STORE.score === 0) {
-    return `<div>
-    <h1>Infernal Plane Quiz Results</h1>
-    <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
-    <p>Pitiful! You know nothing of archdevils, fiends, and their ilk! You would surely perish in the Nine Hells!</p>
-    </div>
+  return `<div>
+    <h1>Trivia Quiz</h1>
+    <h3>You answered ${STORE.score} out of ${STORE.quizLengthSelection} questions correctly</h3>
+    <p>Click below to take another quiz!</p>
     <div class="user-input">
       <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
     </div>`;
-  }
-  else if (STORE.score === 1) {
-    return `<div>
-    <h1>Infernal Plane Quiz Results</h1>
-    <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
-    <p>Wow. You basically know nothing about the Nine Hells. That's probably a good thing.</p>
-    </div>
-    <div class="user-input">
-      <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
-    </div>`;
-  }
-  else if (STORE.score === 2) {
-    return `<div>
-    <h1>Infernal Plane Quiz Results</h1>
-    <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
-    <p>Time to hit the tomes! You don't know very much about the Nine Hells. Study up, consult the infernal Sages, and try again.</p>
-    </div>
-    <div class="user-input">
-      <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
-    </div>`;    
-  }
-  else if (STORE.score === 3) {
-    return `<div>
-    <h1>Infernal Plane Quiz Results</h1>
-    <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
-    <p>So you know a bit about the Nine Hells. You're a middling scholar of fiendish lore. Congratulations.</p>
-    </div>
-    <div class="user-input">
-      <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
-    </div>`;
-  }
-  else if (STORE.score === 4) {
-    return `<div>
-    <h1>Infernal Plane Quiz Results</h1>
-    <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
-    <p>Ah, we've got an infernal loremaster on our hands. You stand to learn more, but your knowledge of the Nine Hells is sound.</p>
-    </div>
-    <div class="user-input">
-      <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
-    </div>`;
-  }
-  else if (STORE.score === 5) {
-    return `<div>
-    <h1>Infernal Plane Quiz Results</h1>
-    <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
-    <p>Excellent work! Your knowledge of the Nine Hells is impressive indeed! Perhaps you have traversed the planes and visited the Nine Hells yourself...</p>
-    </div>
-    <div class="user-input">
-      <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
-    </div>`;
-  }
+  // if (STORE.score === 0) {
+  //   return `<div>
+  //   <h1>Infernal Plane Quiz Results</h1>
+  //   <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
+  //   <p>Pitiful! You know nothing of archdevils, fiends, and their ilk! You would surely perish in the Nine Hells!</p>
+  //   </div>
+  //   <div class="user-input">
+  //     <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
+  //   </div>`;
+  // }
+  // else if (STORE.score === 1) {
+  //   return `<div>
+  //   <h1>Infernal Plane Quiz Results</h1>
+  //   <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
+  //   <p>Wow. You basically know nothing about the Nine Hells. That's probably a good thing.</p>
+  //   </div>
+  //   <div class="user-input">
+  //     <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
+  //   </div>`;
+  // }
+  // else if (STORE.score === 2) {
+  //   return `<div>
+  //   <h1>Infernal Plane Quiz Results</h1>
+  //   <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
+  //   <p>Time to hit the tomes! You don't know very much about the Nine Hells. Study up, consult the infernal Sages, and try again.</p>
+  //   </div>
+  //   <div class="user-input">
+  //     <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
+  //   </div>`;    
+  // }
+  // else if (STORE.score === 3) {
+  //   return `<div>
+  //   <h1>Infernal Plane Quiz Results</h1>
+  //   <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
+  //   <p>So you know a bit about the Nine Hells. You're a middling scholar of fiendish lore. Congratulations.</p>
+  //   </div>
+  //   <div class="user-input">
+  //     <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
+  //   </div>`;
+  // }
+  // else if (STORE.score === 4) {
+  //   return `<div>
+  //   <h1>Infernal Plane Quiz Results</h1>
+  //   <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
+  //   <p>Ah, we've got an infernal loremaster on our hands. You stand to learn more, but your knowledge of the Nine Hells is sound.</p>
+  //   </div>
+  //   <div class="user-input">
+  //     <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
+  //   </div>`;
+  // }
+  // else if (STORE.score === 5) {
+  //   return `<div>
+  //   <h1>Infernal Plane Quiz Results</h1>
+  //   <h3>You answered ${STORE.score} out of 5 questions correctly</h3>
+  //   <p>Excellent work! Your knowledge of the Nine Hells is impressive indeed! Perhaps you have traversed the planes and visited the Nine Hells yourself...</p>
+  //   </div>
+  //   <div class="user-input">
+  //     <button name= "submit-button" id= "reset-button" class= "input-button" type= "submit" >Take quiz again</button>
+  //   </div>`;
+  // }
 }
 
 // *******************
@@ -359,7 +354,7 @@ function renderQuestionView() {
 function renderAnswerFeedback() {
   // declaration of variable for feedback generation
   // insertion answer feedback into the DOM
-  if (STORE.currentQuestion < (QUESTIONS.length - 1)) {
+  if (STORE.currentCounter < STORE.quizLengthSelection) {
     let answerFeedback = generateAnswerFeedback();
     $('.container').html(answerFeedback);
   }
@@ -368,6 +363,7 @@ function renderAnswerFeedback() {
     $('.container').html(answerFeedback);
   }
 }
+
 function renderResultsView() {
   let results = generateResultsView();
   $('.container').html(results);
@@ -396,7 +392,6 @@ function handleUserInputs() {
       }
     }
     STORE.quizLengthSelection = $(event.currentTarget).closest('form').find('#quiz-length-input').val();
-    console.log(STORE.quizLengthSelection);
     if (STORE.quizLengthSelection > 0 && STORE.quizLengthSelection <= 50) {
       fetchToken();
     }
@@ -415,7 +410,7 @@ function handleUserInputs() {
       alert('Please select an answer from the list.');
     }
     // Perform check to determine if user answer is correct
-    else if (STORE.userAnswer === QUESTIONS[STORE.currentQuestion].correctAnswer) {
+    else if (STORE.userAnswer === DECORATEDQUESTIONS[STORE.currentQuestion].correctAnswer) {
       STORE.score++;
       renderAnswerFeedback();
     }
@@ -438,7 +433,13 @@ function handleUserInputs() {
   });
 
   $('.container').on('click', '#reset-button', event => {
-    location.reload(true);
+    event.preventDefault();
+    // location.reload(true);
+    event.preventDefault();
+    QUESTIONS = [],
+    DECORATEDQUESTIONS = [],
+    STORE = getInitialStore();
+    renderQuizOptions();
   });
 }
 
